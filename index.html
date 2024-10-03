@@ -1,0 +1,82 @@
+  <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPad Battery Health Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <meta name="description" content="Calculate your iPad's battery health easily with this online tool. Simply paste your battery data to get detailed health information.">
+    <meta name="keywords" content="iPad, battery health, calculator, Apple, iOS">
+    <meta name="author" content="Your Name">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://yourusername.github.io/ipad-battery-health-calculator/">
+    <meta property="og:title" content="iPad Battery Health Calculator">
+    <meta property="og:description" content="Calculate your iPad's battery health easily with this online tool.">
+    <meta property="og:image" content="https://yourusername.github.io/ipad-battery-health-calculator/preview.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://yourusername.github.io/ipad-battery-health-calculator/">
+    <meta property="twitter:title" content="iPad Battery Health Calculator">
+    <meta property="twitter:description" content="Calculate your iPad's battery health easily with this online tool.">
+    <meta property="twitter:image" content="https://yourusername.github.io/ipad-battery-health-calculator/preview.png">
+</head>
+<body class="bg-purple-500 flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white rounded-lg shadow-xl p-8 max-w-md w-full">
+        <h1 class="text-3xl font-bold text-center mb-6 text-purple-600">iPad Battery Health Calculator</h1>
+        <textarea id="jsonInput" rows="10" class="w-full p-2 border border-gray-300 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-purple-400" placeholder="Paste your battery data here..."></textarea>
+        <button onclick="calculateBatteryHealth()" class="w-full bg-purple-500 text-white py-2 rounded hover:bg-purple-600 transition duration-300">Calculate</button>
+        <div id="result" class="mt-6 text-gray-700"></div>
+    </div>
+
+    <script>
+        function calculateBatteryHealth() {
+            const input = document.getElementById('jsonInput').value;
+
+            const maximumFCC = extractValue(input, 'last_value_MaximumFCC');
+            const nominalChargeCapacity = extractValue(input, 'last_value_NominalChargeCapacity');
+            const cycleCount = extractValue(input, 'last_value_CycleCount');
+
+            if (!maximumFCC || !nominalChargeCapacity || !cycleCount) {
+                document.getElementById('result').innerHTML = '<p class="text-red-500">Required battery data not found in the input.</p>';
+                return;
+            }
+
+            const realCapacity = (nominalChargeCapacity / maximumFCC) * 100;
+            const roundedRealCapacity = realCapacity.toFixed(2);
+
+            const resultHTML = `
+                <h2 class="text-xl font-semibold mb-2">Battery Health Results:</h2>
+                <p><strong>Original Maximum Capacity:</strong> ${maximumFCC} mAh</p>
+                <p><strong>Current Maximum Capacity:</strong> ${nominalChargeCapacity} mAh</p>
+                <p><strong>Charge Cycles:</strong> ${cycleCount}</p>
+                <p class="mt-4"><strong>Battery Health:</strong> <span class="text-2xl font-bold ${getHealthColor(realCapacity)}">${roundedRealCapacity}%</span></p>
+                <p class="mt-2 text-sm">${getHealthDescription(realCapacity)}</p>
+            `;
+
+            document.getElementById('result').innerHTML = resultHTML;
+        }
+
+        function extractValue(input, key) {
+            const regex = new RegExp(`"${key}":\\s*(\\d+)`);
+            const match = input.match(regex);
+            return match ? parseInt(match[1]) : null;
+        }
+
+        function getHealthColor(percentage) {
+            if (percentage >= 80) return 'text-green-500';
+            if (percentage >= 60) return 'text-yellow-500';
+            return 'text-red-500';
+        }
+
+        function getHealthDescription(percentage) {
+            if (percentage >= 80) return 'Your battery is in good condition.';
+            if (percentage >= 60) return 'Your battery is showing signs of wear. Consider getting it checked.';
+            return 'Your battery may need to be replaced soon.';
+        }
+    </script>
+</body>
+</html>
